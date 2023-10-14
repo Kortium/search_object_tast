@@ -23,22 +23,22 @@ class FieldSimulator:
     def scan(self):
         self.scans += 1
         drone_pos = self.drone_position()
-        x, z = drone_pos["X"], drone_pos["Z"]
+        z, x = drone_pos["Z"], drone_pos["X"]
 
-        for i in range(int(x - self.visibility_radius), int(x + self.visibility_radius), self.resolution):
-            for j in range(int(z - self.visibility_radius), int(z + self.visibility_radius), self.resolution):
+        for j in range(int(z - self.visibility_radius), int(z + self.visibility_radius), self.resolution):
+            for i in range(int(x - self.visibility_radius), int(x + self.visibility_radius), self.resolution):
                 if self._distance(x, z, i, j) <= self.visibility_radius:
-                    if 0 < i < self.field_size[0] and 0 < j < self.field_size[1]:
-                        self.scanned_pixels.add((i, j))
+                    if 0 < j < self.field_size[0] and 0 < i < self.field_size[1]:
+                        self.scanned_pixels.add((j, i))
 
-        if self._distance(x, z, self.object_position[0], self.object_position[1]) <= self.visibility_radius:
+        if self._distance(z, x, self.object_position[0], self.object_position[1]) <= self.visibility_radius:
             self.object_found = True
             return True
 
         return False
 
-    def _distance(self, x1, y1, x2, y2):
-        return sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    def _distance(self, z1, x1, z2, x2):
+        return sqrt((z2 - z1)**2 + (x2 - x1)**2)
 
     def evaluate(self):
         total_pixels = (self.field_size[0] // self.resolution) * (self.field_size[1] // self.resolution)
@@ -61,26 +61,26 @@ class FieldSimulator:
     def plot_field(self):
         field = np.zeros((self.field_size[1], self.field_size[0]))
 
-        for x, z in self.scanned_pixels:
-            if 0 <= x < self.field_size[0] and 0 <= z < self.field_size[1]:
-                field[z][x] = 1
+        for z, x in self.scanned_pixels:
+            if 0 <= z < self.field_size[0] and 0 <= x < self.field_size[1]:
+                field[x][z] = 1
 
         plt.imshow(field, cmap='gray', origin='lower')
         plt.colorbar(label='Сканированная часть')
         plt.title('Просканированная часть поля')
-        plt.xlabel('Координата X')
-        plt.ylabel('Координата Z')
-        plt.scatter(*self.object_position, c='red', marker='x', label="Объект")
+        plt.xlabel('Координата Z')
+        plt.ylabel('Координата X')
+        plt.scatter(self.object_position[0],self.object_position[1], c='red', marker='x', label="Объект")
         plt.legend()
         plt.show()
 
 if __name__ == "__main__":
     field_size = (500, 500)
     scan_radius = 30
-    field_sim = FieldSimulator(field_size, (400, 15), scan_radius)
+    field_sim = FieldSimulator(field_size, (415,300), scan_radius)
     solver_ex = solver(field_size)
     step = 0
-    step_limit = 1000
+    step_limit = 2000
     object_found = False
     while not(object_found) and step < step_limit:
         object_found = field_sim.control_drone(*solver_ex.solve(field_sim.drone_position()))
