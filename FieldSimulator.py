@@ -3,7 +3,6 @@ from math import pi, sqrt
 from solution import solver
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 class FieldSimulator:
     def __init__(self, field_size, object_position, visibility_radius, resolution=1):
@@ -44,11 +43,11 @@ class FieldSimulator:
         total_pixels = (self.field_size[0] // self.resolution) * (self.field_size[1] // self.resolution)
         scanned_percentage = (len(self.scanned_pixels) / total_pixels) * 100
         return {
-            "Time Spent": self.time_spent,
-            "Scanned Percentage": scanned_percentage,
-            "Scan counter": self.scans,
-            "Scan effectiveness": scanned_percentage/self.scans,
-            "Object found": self.object_found
+            "Time Spent": f"{self.time_spent:.1f}",
+            "Scanned Percentage": f"{scanned_percentage:.3f}",
+            "Scan counter": f"{self.scans}",
+            "Scan effectiveness": f"{scanned_percentage/self.scans:.3f}",
+            "Object found": f"{self.object_found}"
         }
 
     def control_drone(self, velocity_goal, roll_goal, scan=False):
@@ -59,7 +58,7 @@ class FieldSimulator:
         return False
 
     def plot_field(self):
-        field = np.zeros((self.field_size[1], self.field_size[0]))
+        field = [[0 for i in range(self.field_size[0])] for j in range(self.field_size[1])]
 
         for z, x in self.scanned_pixels:
             if 0 <= z < self.field_size[0] and 0 <= x < self.field_size[1]:
